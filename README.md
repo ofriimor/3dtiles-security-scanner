@@ -11,6 +11,7 @@ A proof of concept for scanning and sanitizing 3D Tiles packages before they rea
 
 #### The goal
 
+
 Take a 3D Tiles ZIP from an untrusted source, find what can harm the viewer or the server, remove it without breaking the tiles, and return a clean package with a report of what changed.
 
 #### Threats in GLB (glTF 2.0)
