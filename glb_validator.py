@@ -15,7 +15,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                     "filepath": filepath,
                     "is_glb": False,
                     "status": "REJECT",
-                    "error": "File is too small to contain a GLB header"
+                    "error": "file is too small to contain a GLB header"
                 }
 
             magic = header[:4]  ## reading the file signature bytes
@@ -27,7 +27,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                     "filepath": filepath,
                     "is_glb": False,
                     "status": "REJECT",
-                    "error": "Invalid GLB magic"
+                    "error": "invalid GLB magic"
                 }
 
             actual_length = os.path.getsize(filepath)
@@ -39,7 +39,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                     "filepath": filepath,
                     "is_glb": True,
                     "status": "UNSUPPORTED",
-                    "error": f"Unsupported GLB version: {version}"
+                    "error": f"unsupported glb version: {version}"
                 }
 
             if declared_length != actual_length:
@@ -47,7 +47,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                     "filepath": filepath,
                     "is_glb": False,
                     "status": "REJECT",
-                    "error": "Declared file length does not match actual file length"
+                    "error": "declared file length does not match actual file length"
                 }
 
             if declared_length < 20:  ## 12 for header , 8 for json header by the docs
@@ -55,7 +55,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                     "filepath": filepath,
                     "is_glb": False,
                     "status": "REJECT",
-                    "error": "GLB file is too small to contain a JSON chunk header"
+                    "error": "glb file is too small to contain a json chunk header"
                 }
 
             # read all the glb chunks
@@ -72,7 +72,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                         "filepath": filepath,
                         "is_glb": False,
                         "status": "REJECT",
-                        "error": "Incomplete chunk header"
+                        "error": "incomplete chunk header"
                     }
 
                 chunk_length = int.from_bytes(chunk_header[:4], "little")  ## for the chunk length
@@ -84,7 +84,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                         "filepath": filepath,
                         "is_glb": False,
                         "status": "REJECT",
-                        "error": "Chunk length must be divisible by 4"
+                        "error": "chunk length must be divisible by 4"
                     }
 
                 # Check that the chunk does not exceed the file length
@@ -93,7 +93,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                         "filepath": filepath,
                         "is_glb": False,
                         "status": "REJECT",
-                        "error": "Chunk length exceeds available file data"
+                        "error": "chunk length exceeds available file data"
                     }
 
                 chunk_data = file.read(chunk_length) ## chunk length = chunk data , without the header
@@ -103,7 +103,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                         "filepath": filepath,
                         "is_glb": False,
                         "status": "REJECT",
-                        "error": "Incomplete chunk data"
+                        "error": "incomplete chunk data"
                     }
 
                 chunks.append({  ## inserting to the chunks list these 2 dict
@@ -118,7 +118,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                             "filepath": filepath,
                             "is_glb": False,
                             "status": "REJECT",
-                            "error": "First GLB chunk must be JSON"
+                            "error": "first glb chunk must be json"
                         }
 
                     json_chunk = chunk_data  ## saving it when its json , the data itself in bytes
@@ -130,7 +130,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                             "filepath": filepath,
                             "is_glb": False,
                             "status": "REJECT",
-                            "error": "More than one BIN chunk found"
+                            "error": "more than one bin chunk found"
                         }
 
                     bin_chunk_length = chunk_length  ## saving the bin length 
@@ -140,7 +140,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                     "filepath": filepath,
                     "is_glb": False,
                     "status": "REJECT",
-                    "error": "Missing JSON chunk"
+                    "error": "missing json chunk"
                 }
 
             try:
@@ -152,7 +152,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                     "filepath": filepath,
                     "is_glb": False,
                     "status": "REJECT",
-                    "error": f"Invalid JSON chunk: {str(e)}"
+                    "error": f"invalid JSON chunk: {str(e)}"
                 }
 
             if not isinstance(glb_json, dict): ## built in func checks the var type
@@ -160,7 +160,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                     "filepath": filepath,
                     "is_glb": False,
                     "status": "REJECT",
-                    "error": "JSON root must be an object"
+                    "error": "json root must be an object"
                 }
 
             if "asset" not in glb_json: ## asset is a must field in the gltf file
@@ -168,7 +168,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                     "filepath": filepath,
                     "is_glb": False,
                     "status": "REJECT",
-                    "error": "Missing required asset object"
+                    "error": "missing required asset object"
                 }
 
             if not isinstance(glb_json["asset"], dict):
@@ -176,7 +176,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                     "filepath": filepath,
                     "is_glb": False,
                     "status": "REJECT",
-                    "error": "Asset must be an object"
+                    "error": "asset must be an object"
                 }
 
             if "version" not in glb_json["asset"]:
@@ -184,7 +184,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                     "filepath": filepath,
                     "is_glb": False,
                     "status": "REJECT",
-                    "error": "Version must be specified in the asset section"
+                    "error": "version must be specified in the asset section"
                 }
 
             if (
@@ -195,7 +195,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                     "filepath": filepath,
                     "is_glb": False,
                     "status": "REJECT",
-                    "error": "Unsupported glTF asset version"
+                    "error": "unsupported gltf asset version"
                 }
 
             buffers = glb_json.get("buffers", []) ## if not finding the buffers, return []
@@ -205,7 +205,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                     "filepath": filepath,
                     "is_glb": False,
                     "status": "REJECT",
-                    "error": "Buffers must be a list"
+                    "error": "buffers must be a list"
                 }
 
             for index, buffer in enumerate(buffers):
@@ -215,7 +215,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                         "filepath": filepath,
                         "is_glb": False,
                         "status": "REJECT",
-                        "error": "Each buffer must be an object"
+                        "error": "each buffer must be an object"
                     }
 
                 if "byteLength" not in buffer:
@@ -223,7 +223,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                         "filepath": filepath,
                         "is_glb": False,
                         "status": "REJECT",
-                        "error": "Missing byteLength in buffer"
+                        "error": "missing byteLength in buffer"
                     }
 
                 if (
@@ -234,7 +234,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                         "filepath": filepath,
                         "is_glb": False,
                         "status": "REJECT",
-                        "error": "Not valid byteLength in buffer"
+                        "error": "not valid byteLength in buffer"
                     }
 
                 # The first buffer in a glb is stored inside the bin chunk
@@ -245,7 +245,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                             "filepath": filepath,
                             "is_glb": False,
                             "status": "REJECT",
-                            "error": "The first GLB buffer must not have an external URI"
+                            "error": "the first glb buffer must not have an external uri"
                         }
 
                     buffer_byte_length = buffer["byteLength"]
@@ -255,7 +255,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                             "filepath": filepath,
                             "is_glb": False,
                             "status": "REJECT",
-                            "error": "Missing BIN chunk for the internal buffer"
+                            "error": "missing bin chunk"
                         }
 
                     if bin_chunk_length is not None:
@@ -287,7 +287,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                         "filepath": filepath,
                         "is_glb": False,
                         "status": "REJECT",
-                        "error": "Each bufferView must be an object"
+                        "error": "each bufferView must be an object"
                     }
 
                 buffer_index = buffer_view.get("buffer")
@@ -303,7 +303,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                         "filepath": filepath,
                         "is_glb": False,
                         "status": "REJECT",
-                        "error": "Invalid bufferView buffer index"
+                        "error": "invalid bufferView buffer index"
                     }
 
                 if (
@@ -314,7 +314,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                         "filepath": filepath,
                         "is_glb": False,
                         "status": "REJECT",
-                        "error": "Invalid bufferView byteOffset"
+                        "error": "invalid bufferView byteOffset"
                     }
 
                 if (
@@ -325,7 +325,7 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
                         "filepath": filepath,
                         "is_glb": False,
                         "status": "REJECT",
-                        "error": "Invalid bufferView byteLength"
+                        "error": "invalid bufferView byteLength"
                     }
 
                 # find the buffer that this bufferView points to
@@ -351,12 +351,12 @@ def inspect_glb(filepath: str):  ## assuming ill get a string, not forcing it th
         return {
             "filepath": filepath,
             "status": "REJECT",
-            "error": "File not found"
+            "error": "file not found"
         }
 
     except PermissionError: ## exits but no permission
         return {
             "filepath": filepath,
             "status": "REJECT",
-            "error": "Permission denied"
+            "error": "permission denied"
         }

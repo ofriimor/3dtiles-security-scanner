@@ -43,7 +43,7 @@ def scan_for_xss(glb_json):
                         "rule": rule,
                         "location": location,
                         "value_preview": value[:100],
-                        "message": "Suspicious XSS pattern found in GLB JSON"
+                        "message": "suspicious xss pattern found in glb json"
                     })
 
     check_value(glb_json, "glb_json")  ## python somhow retruns to where we were before a value wasnt a match
