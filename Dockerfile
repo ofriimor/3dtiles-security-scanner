@@ -1,4 +1,4 @@
-# Base image of python version 3.12
+# base image of python version 3.12
 FROM python:3.12-slim 
 
 # The folder inside the container where the app lives
