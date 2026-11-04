@@ -7,7 +7,6 @@ import tempfile
 import zipfile
 import shutil
 import stat
-
 from tileset_validator import validate_tileset_and_collect_uris
 from glb_security_scanner import scan_glb_security
 from sanitize_tileset import sanitize_tileset
@@ -16,77 +15,71 @@ from glb_sanitizer import sanitize_glb
 
 app = FastAPI(
     title="3D Tiles Security Scanner",
-    description="API for sanitizing 3D Tiles ZIP packages",
+    description="api for sanitizing 3D tiles zip packages",
     version="0.2.0"
 )
 
 
-# Extract the ZIP file safely
-def extract_zip_safely(zip_path, extract_dir):
+def extract_zip_safely(zip_path, extract_dir): ## zip path in my computer , extract dir - the dir i want to put in the exrtacted zip
+    extract_root = extract_dir.resolve()  ## if :extract_dir = Path("temp/extracted") then :C:\project\temp\extracted
+    ## resolve() makes it  cwd , current working directory instead of relative path
 
-    extract_root = extract_dir.resolve()
-    total_size = 0
 
+    total_size = 0 ## now i want to make sure im not getting Dos attack on my app
     with zipfile.ZipFile(zip_path, "r") as zip_file:
-
-        items = zip_file.infolist()
-
-        if len(items) > 2000:
-            raise ValueError("ZIP contains too many files")
-
+        items = zip_file.infolist()  # the number of the resources in the zip 
+        if len(items) > 50000: ## 
+            raise ValueError("zip contains too many files") ## ive read that this is the appropriate ammount for rejecteing 
+        ## the files can be so tiny , and casue a lot of effort to extract them
         # check every file before extracting anything
-        for item in items:
+        for item in items:   
+            total_size += item.file_size ## for each item in the loop we are getting his file size and adding to the total size
+            if total_size > 500 * 1024 * 1024: # 500 MiB if its reaches this size in some point 
+                raise ValueError("zip is too large")
 
-            total_size += item.file_size
+            if item.compress_size > 0 and item.file_size / item.compress_size > 200: ## the division of the compression 
+                ## apperntly it can cost zipbomb attack
+                ##wiki : a malicious, tiny archive file designed to crash, freeze, or overwhelm a computer system or server by 
+                #expanding into an enormous amount of data when unzipped!! , thats why i need to check 
+                ## if the 400 - the filesize , and the compressed is 1mb i will do 400/1 = reject cause > 200
+                raise ValueError("suspicious zip compression ratio")
+            
+            if item.flag_bits & 0x1: # Bitwise AND, asks if the first bit is up(1) , if so , its encrypted
+                raise ValueError("encrypted ZIP files are not supported")
+            ## 0001 - encrypted , the rightest byte is 1 , 000010 - not 
+            output_path = (extract_dir / item.filename).resolve() # C:\scanner\temp\extracted / models/building.glb , not division but connecting the paths C:\scanner\temp\extracted\models\building.glb
 
-            if total_size > 500 * 1024 * 1024:
-                raise ValueError("ZIP is too large")
+            if "\\" in item.filename or not output_path.is_relative_to(extract_root):  ## the final path is within the extract root?
+                raise ValueError("unsafe path found inside the zip")
 
-            if item.compress_size > 0 and item.file_size / item.compress_size > 200:
-                raise ValueError("Suspicious ZIP compression ratio")
-
-            if stat.S_ISLNK(item.external_attr >> 16):
-                raise ValueError("Symbolic links are not allowed inside ZIP")
-
-            if item.flag_bits & 0x1:
-                raise ValueError("Encrypted ZIP files are not supported")
-
-            # one check catches "..", absolute paths and drive letters
-            output_path = (extract_dir / item.filename).resolve()
-
-            if "\\" in item.filename or not output_path.is_relative_to(extract_root):
-                raise ValueError("Unsafe path found inside ZIP")
-
-        zip_file.extractall(extract_dir)
+        zip_file.extractall(extract_dir)   ## 
 
 
-# Find the one tileset.json inside the folder
+# find the one tileset.json inside the folder
 def find_tileset(folder):
-
-    tileset_files = list(folder.rglob("tileset.json"))
-
+    tileset_files = list(folder.rglob("tileset.json")) ## finds files with this name in all dirs and their dirs 
+    # and returninng them all in a list
     if not tileset_files:
-        raise ValueError("No tileset.json file found inside the ZIP")
+        raise ValueError("tileset.json file is not inside the zip") ## there isnt tileset at all
 
-    if len(tileset_files) > 1:
-        raise ValueError("More than one tileset.json found. Please upload one Tileset at a time.")
-
+    if len(tileset_files) > 1: # for this scan , supposed to be one tileset
+        raise ValueError("more than one tileset.json found")
     return tileset_files[0]
 
 
-# Clean tileset.json and every GLB, returns the files to keep and a report
+# clean tileset.json and every GLB, returns the files to keep and a report
 def sanitize_package(tileset_path, extract_dir):
 
-    # Step 1: Clean tileset.json (we work on the extracted copy, so we save over it)
+    # we get the clean tileset , (the file i want to clean,the extracted dir, the path that the files are going to be saved in overriding the first )
     tileset_result = sanitize_tileset(tileset_path, extract_dir, tileset_path)
 
-    if tileset_result["status"] == "REJECT":
+    if tileset_result["status"] == "REJECT":   ## meaning the structure is currpted or couldnt sanatize well
         raise HTTPException(status_code=400, detail={
-            "error": "Invalid tileset.json",
+            "error": "invalid tileset.json", 
             "findings": tileset_result["findings"]
         })
 
-    report = {
+    report = {   ## give it either way
         "removed_uris": tileset_result.get("removed", []),
         "sanitized_glbs": [],
         "not_scanned": []
@@ -95,16 +88,16 @@ def sanitize_package(tileset_path, extract_dir):
     # Step 2: Clean every GLB
     for item in tileset_result["files"]:
 
-        # Other file types are kept, but not scanned
-        if item["file_type"] != "GLB":
-            report["not_scanned"].append(item["uri"])
-            continue
+        # other file types are kept, but not scanned, not deleting it - FOR NOW....
+        if item["file_type"] != "GLB": # ill focus on them in the future 
+            report["not_scanned"].append(item["uri"]) ## just add the uri of them for now 
+            continue ## moving   to the next file 
 
-        glb_result = sanitize_glb(item["path"], item["path"])
+        glb_result = sanitize_glb(item["path"], item["path"])     # (where we have the item we want to scan , overriding it with the sanatized file)
 
         if glb_result["status"] == "REJECT":
             raise HTTPException(status_code=400, detail={
-                "error": "GLB could not be sanitized",
+                "error": "glb could not be sanitized",
                 "file": item["uri"],
                 "reason": glb_result["error"]
             })

@@ -98,7 +98,7 @@ def sanitize_glb(filepath, output_path):
     try:
         remove_xss_findings(glb_json, findings)
     except (KeyError, IndexError, ValueError, TypeError):
-        return {"status": "REJECT", "error": "Could not remove the findings"}
+        return {"status": "REJECT", "error": "could not remove the findings"}
 
     rebuild_glb(filepath, glb_json, output_path)
 
@@ -106,10 +106,10 @@ def sanitize_glb(filepath, output_path):
     check = scan_glb_security(output_path)
 
     if check["structure_status"] != "STRUCTURALLY_VALID":
-        return {"status": "REJECT", "error": "GLB is broken after cleaning"}
+        return {"status": "REJECT", "error": "glb is broken after cleaning"}
 
     if check["security_findings"]:
-        return {"status": "REJECT", "error": "Findings are left after cleaning"}
+        return {"status": "REJECT", "error": "there are suspicious findings left after cleaning"}
 
     removed = []
     for finding in findings:
