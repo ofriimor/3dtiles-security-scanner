@@ -24,7 +24,6 @@ def extract_zip_safely(zip_path, extract_dir): ## zip path in my computer , extr
     extract_root = extract_dir.resolve()  ## if :extract_dir = Path("temp/extracted") then :C:\project\temp\extracted
     ## resolve() makes it  cwd , current working directory instead of relative path
 
-
     total_size = 0 ## now i want to make sure im not getting Dos attack on my app
     with zipfile.ZipFile(zip_path, "r") as zip_file:
         items = zip_file.infolist()  # the number of the resources in the zip 
@@ -66,10 +65,16 @@ def find_tileset(folder):
         raise ValueError("more than one tileset.json found")
     return tileset_files[0]
 
+## figured id do the same thing i did in the validator here. 
+def is_glb_by_magic(filepath):
+    with open(filepath, "rb") as file:
+        magic = file.read(4)
 
-# clean tileset.json and every GLB, returns the files to keep and a report
+    return magic == b"glTF"
+
+
+# clean tileset.json and every glb, returns the files to keep and a report
 def sanitize_package(tileset_path, extract_dir):
-
     # we get the clean tileset , (the file i want to clean,the extracted dir, the path that the files are going to be saved in overriding the first )
     tileset_result = sanitize_tileset(tileset_path, extract_dir, tileset_path)
 
@@ -85,123 +90,146 @@ def sanitize_package(tileset_path, extract_dir):
         "not_scanned": []
     }
 
-    # Step 2: Clean every GLB
-    for item in tileset_result["files"]:
+    # clean every glb
+    for item in tileset_result["files"]:  ## every items in the tileset result dict
 
-        # other file types are kept, but not scanned, not deleting it - FOR NOW....
-        if item["file_type"] != "GLB": # ill focus on them in the future 
-            report["not_scanned"].append(item["uri"]) ## just add the uri of them for now 
-            continue ## moving   to the next file 
+        is_glb = is_glb_by_magic(item["path"])
+
+        if item["file_type"] != "GLB" and not is_glb:  ## there is no chance its glb at all
+            ## ill handle those in the future, like b3dm or others
+            report["not_scanned"].append(item["uri"])
+            continue
+
+        if not is_glb: ## meaning its .glb but! the magic bytes are not it , i wiill not scan it 
+            raise HTTPException(
+                status_code=400,
+                detail=f"invalid GLB magic bytes: {item['uri']}"
+            )
 
         glb_result = sanitize_glb(item["path"], item["path"])     # (where we have the item we want to scan , overriding it with the sanatized file)
 
-        if glb_result["status"] == "REJECT":
+        if glb_result["status"] == "REJECT":  ## coudtnt sanatize it . or the structure incorrect
             raise HTTPException(status_code=400, detail={
                 "error": "glb could not be sanitized",
                 "file": item["uri"],
                 "reason": glb_result["error"]
             })
 
-        if glb_result["status"] == "SANITIZED":
+        if glb_result["status"] == "SANITIZED":   
             report["sanitized_glbs"].append({
-                "file": item["uri"],
-                "removed": glb_result["removed"]
+                "file": item["uri"],   ## get the uri of each sanatized from the sanatized tileset
+                "removed": glb_result["removed"] ## from the tileset_result["files"]
             })
 
-    return tileset_result["files"], report
+    return tileset_result["files"], report  
 
 
-# Build a new ZIP with only tileset.json, the files it uses and the report
+# build a new zip with only tileset.json, the files it uses and the report
 def build_zip(extract_dir, tileset_path, files, report, new_zip_path):
 
-    added = []
+    added = [] ## all the paths , so i will not add somthing that was already in the list
 
-    with zipfile.ZipFile(new_zip_path, "w", zipfile.ZIP_DEFLATED) as new_zip:
+    with zipfile.ZipFile(new_zip_path, "w", zipfile.ZIP_DEFLATED) as new_zip: ## w for write
+        ## zipfile - object that represent the file , zip_deflated lets me do the compression
+        ## returnin the zip compressed
 
-        new_zip.write(tileset_path, tileset_path.relative_to(extract_dir))
+        new_zip.write(tileset_path, tileset_path.relative_to(extract_dir)) ## adding tilesetpath to the tileset_path.relative_to(extract_dir)
 
         for item in files:
 
-            path = Path(item["path"])
+            path = Path(item["path"])   ## take the path of the item and turn it into path item
 
-            if path not in added:  ## the same GLB can be used by many tiles
-                new_zip.write(path, path.relative_to(extract_dir))
-                added.append(path)
+            if path not in added:  ## the same glb can be used by many tiles
+                new_zip.write(path, path.relative_to(extract_dir)) ## then take the file within this path 
+                ## and put this in the relative path within the zip
+                added.append(path) ## add it to the added list , so i will not add twiice
 
-        new_zip.writestr("report.json", json.dumps(report, indent=2))
+        new_zip.writestr("report.json", json.dumps(report, indent=2)) ## create report.json file 
+        ## use the report from the sanatize_package, json dumps coverts python dict to json
+        # with indent , google recommended , cause its pretty print that way (hazahot)
 
 
-# Open the new ZIP and check the whole package again
+# open the new zip and check the whole package again
 def check_new_zip(new_zip_path, check_dir):
 
-    check_dir.mkdir()
-    extract_zip_safely(new_zip_path, check_dir)
+    check_dir.mkdir() ## new dir called check_dir
+    extract_zip_safely(new_zip_path, check_dir) ## extracts the new zip built , into the checkdir 
 
-    tileset_path = find_tileset(check_dir)
-    result = validate_tileset_and_collect_uris(tileset_path, check_dir)
+    tileset_path = find_tileset(check_dir) ## search the tileset.json in the new dir , if doesnt exist or exit 2 is invlid
+    result = validate_tileset_and_collect_uris(tileset_path, check_dir) # gets the tileset i jsut extracted , validate it from within
 
-    if result["status"] != "valid" or result["uri_findings"]:
-        return False
+    if result["status"] != "valid" or result["uri_findings"]: ## tilset not valid or there are uri findings
+       return False ## the new zip is not safe
 
     for item in result["files"]:
-        if item["file_type"] == "GLB":
+        if item["file_type"] == "GLB":   ## i want to change it to magic types, in the future 
             if scan_glb_security(item["path"])["security_status"] != "NO_FINDINGS":
                 return False
 
     return True
 
 
-@app.post("/tileset-scanner/")
-def inspect_tileset_endpoint(file: UploadFile = File(...)):
+@app.post("/tileset-scanner/") ## telling the fast api: when a post http request is coming to /tileset-scanner/
+## when it happens , run this func
+def inspect_tileset_endpoint(file: UploadFile = File(...)): # upload file meaning we are excpectiing a file that thw user uploaded
+    ## and the file... meaning its a must parameter, 
 
-    # Check that the uploaded file is a ZIP
-    if not file.filename or not file.filename.lower().endswith(".zip"):
-        raise HTTPException(status_code=400, detail="Please upload a ZIP file")
+    # check that the uploaded file is a zip by its extension(i need to figure out a clever way to do that)
+    if not file.filename or not file.filename.lower().endswith(".zip"): 
+        raise HTTPException(status_code=400, detail="upload a zip file")
 
-    # Create a temporary folder for this scan
-    with tempfile.TemporaryDirectory() as temp_dir:
+    # create a temporary folder for this scan
+    with tempfile.TemporaryDirectory() as temp_dir: ## when the user sends zip
+        ## temp dir is a str for the path of the file 
+        temp_path = Path(temp_dir).resolve()  ## makes the tempdir to path object the python can work with 
+        ## the resolve for 
+        extract_dir = temp_path / "extracted" ## sub dir named extracted
+        extract_dir.mkdir() ## creating it , currently empty
 
-        temp_path = Path(temp_dir).resolve()
-        extract_dir = temp_path / "extracted"
-        extract_dir.mkdir()
-
-        zip_path = temp_path / "uploaded.zip"
+        zip_path = temp_path / "uploaded.zip" ## same thing 
+        ## temp - extracted dir, uploaded zip in it 
 
         # Save the uploaded ZIP file
-        with open(zip_path, "wb") as saved_file:
-            shutil.copyfileobj(file.file, saved_file)
+        with open(zip_path, "wb") as saved_file: # opening the zip path , and writing binary
+            ## apparently only using w isnt enough , cause it would write text by default
+            ## thats how we write the bytes in the most accurate way
+            shutil.copyfileobj(file.file, saved_file)  # file.file is the content of the file in zip_path, that we uploaded
+            # saved_file is the file we write in, and shutil.copyfileobj copies the data from one zip to the saved_file 
 
         try:
 
-            # Step 1: Extract the ZIP
-            extract_zip_safely(zip_path, extract_dir)
-
-            # Step 2: Find tileset.json
-            tileset_path = find_tileset(extract_dir)
-
+            extract_zip_safely(zip_path, extract_dir) ## trying to extract 
+            ## if succeded.. 
+            tileset_path = find_tileset(extract_dir)  # get the tileset.json
+            ## raise = just stopping the func and using the try/except handling errors engine
             # Step 3: Clean tileset.json and the GLB files
-            files, report = sanitize_package(tileset_path, extract_dir)
+            files, report = sanitize_package(tileset_path, extract_dir) ## making sure its clean and gettin the files and the json report
 
-            # Step 4: Build the new ZIP
-            new_zip_path = temp_path / "sanitized.zip"
-            build_zip(extract_dir, tileset_path, files, report, new_zip_path)
+            # building the new zip now 
+            new_zip_path = temp_path / "sanitized.zip" ## only declaring that this is the path i want to put the anatized in
+            build_zip(extract_dir, tileset_path, files, report, new_zip_path) ## buliding evrything in this path
 
-            # Step 5: Check the new ZIP again
-            if not check_new_zip(new_zip_path, temp_path / "check"):
-                raise HTTPException(status_code=400, detail="Package failed the final check")
+            ## checking the new zip again , making sure 
+            if not check_new_zip(new_zip_path, temp_path / "check"): # with the path to the new zip, and :  temp_path / "check" is another path that the func will extract her zip into , to check it 
+                raise HTTPException(status_code=400, detail="package failed the final check")
 
-            # Step 6: Return the sanitized ZIP, with the same name + " - scanner"
-            new_name = Path(file.filename).stem + " - scanner.zip"
+            #return the sanitized zip, with the same name + " - scanner"
+            new_name = Path(file.filename).stem + " - scanner.zip" # i figured this will be ok , like the bgn does
 
+            ## now building the http response that is sent back to the user, using the fastapi library
+            ## this library has everything.
+            # nfm - newzipfile is the path to sanatized.zip, read_bytes reads the binary data and returns it as bytes
             return Response(
-                content=new_zip_path.read_bytes(),
+                content=new_zip_path.read_bytes(), ## the path to the new zip , read the bytes out of him and send it 
                 media_type="application/zip",
                 ## quote() so names in Hebrew or with spaces work too
                 headers={"Content-Disposition": "attachment; filename*=UTF-8''" + quote(new_name)}
             )
 
-        except ValueError as error:
-            raise HTTPException(status_code=400, detail=str(error))
+        except ValueError as error: ## saving the object valueerror in error variable
+            raise HTTPException(status_code=400, detail=str(error)) # making it string 
+        ## for example if there is in extract zip : raise ValueError("the zip contains too much files")
+        # it will return this exactly with this status code
 
-        except zipfile.BadZipFile:
-            raise HTTPException(status_code=400, detail="Invalid ZIP file")
+        except zipfile.BadZipFile: ## is the zip is unreadable
+            raise HTTPException(status_code=400, detail="invalid ZIP file")  ## hardcoded , not somthing xpecific , using the badzipfile method

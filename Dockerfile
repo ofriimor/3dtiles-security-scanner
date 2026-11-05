@@ -1,4 +1,6 @@
 # base image of python version 3.12
+## slim is for getting the minmal python image , with no other libraries which arent must in python ,
+## so the image will load faster
 FROM python:3.12-slim 
 
 # The folder inside the container where the app lives
