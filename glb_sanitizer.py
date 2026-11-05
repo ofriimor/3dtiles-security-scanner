@@ -82,38 +82,43 @@ def rebuild_glb(original_path, new_json, output_path):
 
 
 # main function: scan the glb, remove what the scanner found, check again
-def sanitize_glb(filepath, output_path):
+def sanitize_glb(filepath, output_path): ## path to the glb we want to sanatize, the path the glb will be save in after the sanatization
 
-    result = inspect_glb(filepath)
+    result = inspect_glb(filepath) ## validating the structure of the glb, returning result dictionary 
+    ## with the fields status and glb json ill use
 
-    if result.get("status") != "STRUCTURALLY_VALID":
+    if result.get("status") != "STRUCTURALLY_VALID": ## not sanatizing if not valid structure
         return {"status": "REJECT", "error": result.get("error")}
 
-    glb_json = result["glb_json"]
-    findings = scan_for_xss(glb_json)
+    glb_json = result["glb_json"]  ## getting the actual json
+    findings = scan_for_xss(glb_json)   ## getting the findings dict of the xss findings in the glb
 
-    if not findings:
+    if not findings:  ## empty
         return {"status": "NO_FINDINGS", "path": filepath}
 
-    try:
+    try: ## not empty , needs to be sanatized
         remove_xss_findings(glb_json, findings)
-    except (KeyError, IndexError, ValueError, TypeError):
+    except (KeyError, IndexError, ValueError, TypeError): ##  for one of these reasons , throw error 
         return {"status": "REJECT", "error": "could not remove the findings"}
 
-    rebuild_glb(filepath, glb_json, output_path)
+    rebuild_glb(filepath, glb_json, output_path) ## now it successfuly removed the xss if there were any
 
     # check the new file again: structure + security
-    check = scan_glb_security(output_path)
+    check = scan_glb_security(output_path) ## check dict with the outputpath parameter 
 
-    if check["structure_status"] != "STRUCTURALLY_VALID":
+    if check["structure_status"] != "STRUCTURALLY_VALID": ## getting the field from the scanglb result
         return {"status": "REJECT", "error": "glb is broken after cleaning"}
 
-    if check["security_findings"]:
+    if check["security_findings"]: ## even after cleaning , not empty secuirty finding list
         return {"status": "REJECT", "error": "there are suspicious findings left after cleaning"}
 
-    removed = []
-    for finding in findings:
-        if finding["location"] not in removed:
-            removed.append(finding["location"])
+    ## i figured it will be clever to make a list of all the locations in which i found suspicious values 
+    ## in the scan for xss 
+    ## and findings can contain more than one location , cause i identified in my glb more than one sus thing 
+    ## so i need to make sure there are no duplicates in my removed list before i insert into it 
+    removed = [] #
+    for finding in findings: 
+        if finding["location"] not in removed:  ## making sure 
+            removed.append(finding["location"]) ## inserting 
 
-    return {"status": "SANITIZED", "path": output_path, "removed": removed}
+    return {"status": "SANITIZED", "path": output_path, "removed": removed} # sanatized, the path to the glb after the sanatize, and the removed locations   
