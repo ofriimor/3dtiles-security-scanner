@@ -6,9 +6,14 @@ from glb_validator import inspect_glb ## making sure its validated
 def scan_for_xss(glb_json):
 
     suspicious_patterns = {
-        "SCRIPT_TAG": r"<\s*script\b",
-        "HTML_EVENT_HANDLER": r"\bon[a-z]+\s*=",
-        "JAVASCRIPT_URI": r"javascript\s*:"
+        "SCRIPT_TAG": r"<\s*script\b", 
+        ## r - raw string, finding < in the string , \s for tab or space , * - 0 times or more, finding the word script
+        ## an the \b is for the end of the word , so i will not find <scriptttt>
+        "HTML_EVENT_HANDLER": r"\bon[a-z]+\s*=", ## "on" has to be in it , then lowercase letter in english like onload
+        ## + : at least one time , again the tab can be zero times or more, and find the sign "="
+        ## like onclick()= onload()= that runs js code
+        "JAVASCRIPT_URI": r"javascript\s*:" ## trying to find uris that use javascript funcs 
+        # <a href="javascript:alert('xss things')">click</a>
     }
 
     findings = []  ## empty list 
