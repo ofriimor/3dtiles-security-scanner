@@ -90,7 +90,7 @@ def sanitize_package(tileset_path, extract_dir):
         "not_scanned": []
     }
 
-    # clean every glb
+    # check every file the tileset uses 
     for item in tileset_result["files"]:
 
         is_glb = is_glb_by_magic(item["path"])
