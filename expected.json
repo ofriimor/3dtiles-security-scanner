@@ -1,0 +1,322 @@
+{
+  "valid/01_single_glb.zip": {
+    "expected": "valid",
+    "what_it_tests": "one tile, one clean GLB"
+  },
+  "valid/02_glb_in_root_folder.zip": {
+    "expected": "valid",
+    "what_it_tests": "GLB next to tileset.json"
+  },
+  "valid/03_package_in_subfolder.zip": {
+    "expected": "valid",
+    "what_it_tests": "whole package inside one top folder"
+  },
+  "valid/04_three_children.zip": {
+    "expected": "valid",
+    "what_it_tests": "root without content, three children"
+  },
+  "valid/05_shared_glb.zip": {
+    "expected": "valid",
+    "what_it_tests": "two tiles use the same GLB"
+  },
+  "valid/06_deep_tree_8_levels.zip": {
+    "expected": "valid",
+    "what_it_tests": "8 nested levels of tiles"
+  },
+  "valid/07_uri_with_encoded_space.zip": {
+    "expected": "valid",
+    "what_it_tests": "URI with %20, file name with a space"
+  },
+  "valid/08_uri_with_query_string.zip": {
+    "expected": "valid",
+    "what_it_tests": "URI with ?v=2 cache-buster"
+  },
+  "valid/09_uppercase_extension.zip": {
+    "expected": "valid",
+    "what_it_tests": "extension in capital letters"
+  },
+  "valid/10_region_bounding_volume.zip": {
+    "expected": "valid",
+    "what_it_tests": "region bounding volume"
+  },
+  "valid/11_sphere_bounding_volume.zip": {
+    "expected": "valid",
+    "what_it_tests": "sphere bounding volume"
+  },
+  "valid/12_tileset_version_1_0.zip": {
+    "expected": "valid",
+    "what_it_tests": "3D Tiles 1.0"
+  },
+  "valid/13_hebrew_names.zip": {
+    "expected": "valid",
+    "what_it_tests": "non-ASCII node name"
+  },
+  "valid/14_safe_words_look_like_rules.zip": {
+    "expected": "valid",
+    "what_it_tests": "words that contain 'on', 'script', 'javascript' but are safe"
+  },
+  "valid/15_rich_extras.zip": {
+    "expected": "valid",
+    "what_it_tests": "nested extras with numbers and lists"
+  },
+  "valid/16_materials_and_names.zip": {
+    "expected": "valid",
+    "what_it_tests": "material and mesh names"
+  },
+  "valid/17_tileset_extras_and_properties.zip": {
+    "expected": "valid",
+    "what_it_tests": "tileset with properties and extras"
+  },
+  "valid/18_unreferenced_files_dropped.zip": {
+    "expected": "valid",
+    "what_it_tests": "extra files nobody references (they are left out of the output)"
+  },
+  "valid/19_two_glbs_multiple_bufferviews.zip": {
+    "expected": "valid",
+    "what_it_tests": "GLB with two bufferViews"
+  },
+  "valid/20_b3dm_content_not_scanned.zip": {
+    "expected": "valid",
+    "what_it_tests": "known type with no scanner yet -> listed in not_scanned"
+  },
+  "sanitized/01_uri_https_external.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "external https URI"
+  },
+  "sanitized/02_uri_http_internal_ip.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "SSRF to cloud metadata IP"
+  },
+  "sanitized/03_uri_protocol_relative.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "protocol-relative URI"
+  },
+  "sanitized/04_uri_file_scheme.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "file:// scheme"
+  },
+  "sanitized/05_uri_data_scheme.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "data: scheme"
+  },
+  "sanitized/06_uri_javascript_scheme.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "javascript: scheme"
+  },
+  "sanitized/07_uri_path_traversal.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "../ traversal"
+  },
+  "sanitized/08_uri_encoded_traversal.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "URL-encoded traversal"
+  },
+  "sanitized/09_uri_absolute_path.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "absolute path"
+  },
+  "sanitized/10_uri_backslash.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "backslash in URI"
+  },
+  "sanitized/11_uri_missing_file.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "file is not in the ZIP"
+  },
+  "sanitized/12_uri_traversal_back_inside.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "traversal that leaves the folder and comes back"
+  },
+  "sanitized/13_xss_script_in_generator.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "<script> in asset.generator"
+  },
+  "sanitized/14_xss_script_in_copyright.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "<script> in asset.copyright"
+  },
+  "sanitized/15_xss_script_in_node_name.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "<script> in node name"
+  },
+  "sanitized/16_xss_onload_in_node_name.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "event handler in node name"
+  },
+  "sanitized/17_xss_img_onerror.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "img onerror"
+  },
+  "sanitized/18_xss_svg_slash_onload.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "svg with slash before onload"
+  },
+  "sanitized/19_xss_mixed_case.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "mixed case script tag"
+  },
+  "sanitized/20_xss_space_after_bracket.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "spaces after <"
+  },
+  "sanitized/21_xss_javascript_uri_in_extras.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "javascript: in extras"
+  },
+  "sanitized/22_xss_javascript_with_spaces.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "spaces before the colon"
+  },
+  "sanitized/23_xss_deeply_nested_extras.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "deep inside extras"
+  },
+  "sanitized/24_xss_list_items.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "two bad items in one list (index shifting)"
+  },
+  "sanitized/25_xss_one_value_two_rules.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "one value that matches all three rules"
+  },
+  "sanitized/26_xss_in_mesh_and_material.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "mesh name and material name"
+  },
+  "sanitized/27_xss_in_many_places.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "generator + scene + node"
+  },
+  "sanitized/28_xss_in_two_glbs.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "XSS in two different GLBs"
+  },
+  "sanitized/29_xss_and_bad_uri_together.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "bad URI in tileset + XSS in GLB"
+  },
+  "sanitized/30_xss_hebrew_and_script.zip": {
+    "expected": "sanitized",
+    "what_it_tests": "Hebrew text mixed with script"
+  },
+  "rejected/01_zip_slip_dotdot.zip": {
+    "expected": "rejected",
+    "what_it_tests": "entry named ../evil.txt"
+  },
+  "rejected/02_zip_slip_nested_dotdot.zip": {
+    "expected": "rejected",
+    "what_it_tests": "entry named tiles/../../evil.txt"
+  },
+  "rejected/03_zip_absolute_path.zip": {
+    "expected": "rejected",
+    "what_it_tests": "entry named /tmp/evil.txt"
+  },
+  "rejected/04_zip_backslash_path.zip": {
+    "expected": "rejected",
+    "what_it_tests": "entry named ..\\..\\evil.txt"
+  },
+  "rejected/05_zip_high_compression_ratio.zip": {
+    "expected": "rejected",
+    "what_it_tests": "20 MB of zeros (ratio > 200)"
+  },
+  "rejected/06_not_a_zip.zip": {
+    "expected": "rejected",
+    "what_it_tests": "random bytes with .zip extension"
+  },
+  "rejected/07_wrong_extension.rar": {
+    "expected": "rejected",
+    "what_it_tests": "valid ZIP uploaded as .rar"
+  },
+  "rejected/08_no_tileset.zip": {
+    "expected": "rejected",
+    "what_it_tests": "no tileset.json in the package"
+  },
+  "rejected/09_two_tilesets.zip": {
+    "expected": "rejected",
+    "what_it_tests": "two tileset.json files"
+  },
+  "rejected/10_tileset_invalid_json.zip": {
+    "expected": "rejected",
+    "what_it_tests": "broken JSON"
+  },
+  "rejected/11_tileset_empty.zip": {
+    "expected": "rejected",
+    "what_it_tests": "empty tileset.json"
+  },
+  "rejected/12_tileset_is_list.zip": {
+    "expected": "rejected",
+    "what_it_tests": "tileset root is a list"
+  },
+  "rejected/13_tileset_missing_asset.zip": {
+    "expected": "rejected",
+    "what_it_tests": "no asset"
+  },
+  "rejected/14_tileset_missing_root.zip": {
+    "expected": "rejected",
+    "what_it_tests": "no root"
+  },
+  "rejected/15_tileset_version_is_number.zip": {
+    "expected": "rejected",
+    "what_it_tests": "asset.version is a number"
+  },
+  "rejected/16_tileset_negative_geometric_error.zip": {
+    "expected": "rejected",
+    "what_it_tests": "negative geometricError"
+  },
+  "rejected/17_tileset_root_no_bounding_volume.zip": {
+    "expected": "rejected",
+    "what_it_tests": "root without boundingVolume"
+  },
+  "rejected/18_tileset_bad_refine.zip": {
+    "expected": "rejected",
+    "what_it_tests": "refine is not ADD/REPLACE"
+  },
+  "rejected/19_html_content.zip": {
+    "expected": "rejected",
+    "what_it_tests": "tile points to an HTML file"
+  },
+  "rejected/20_exe_content.zip": {
+    "expected": "rejected",
+    "what_it_tests": "tile points to an EXE"
+  },
+  "rejected/21_png_named_glb.zip": {
+    "expected": "rejected",
+    "what_it_tests": "PNG with .glb extension"
+  },
+  "rejected/22_glb_named_b3dm.zip": {
+    "expected": "rejected",
+    "what_it_tests": "real GLB hiding as .b3dm"
+  },
+  "rejected/23_glb_too_small.zip": {
+    "expected": "rejected",
+    "what_it_tests": "file shorter than the 12-byte header"
+  },
+  "rejected/24_glb_header_version_1.zip": {
+    "expected": "rejected",
+    "what_it_tests": "GLB container version 1"
+  },
+  "rejected/25_glb_length_mismatch.zip": {
+    "expected": "rejected",
+    "what_it_tests": "declared length is wrong"
+  },
+  "rejected/26_glb_invalid_json_chunk.zip": {
+    "expected": "rejected",
+    "what_it_tests": "JSON chunk is not valid JSON"
+  },
+  "rejected/27_glb_gltf_version_1.zip": {
+    "expected": "rejected",
+    "what_it_tests": "asset.version is 1.0"
+  },
+  "rejected/28_glb_missing_bin_chunk.zip": {
+    "expected": "rejected",
+    "what_it_tests": "buffer declared but no BIN chunk"
+  },
+  "rejected/29_glb_bufferview_out_of_bounds.zip": {
+    "expected": "rejected",
+    "what_it_tests": "bufferView reads past the end of the buffer"
+  },
+  "rejected/30_glb_first_buffer_external_uri.zip": {
+    "expected": "rejected",
+    "what_it_tests": "the GLB's own buffer points to an external URI"
+  }
+}
