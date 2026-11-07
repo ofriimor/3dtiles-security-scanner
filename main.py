@@ -27,6 +27,7 @@ def extract_zip_safely(zip_path, extract_dir): ## zip path in my computer , extr
     total_size = 0 ## now i want to make sure im not getting Dos attack on my app
     with zipfile.ZipFile(zip_path, "r") as zip_file:
         items = zip_file.infolist()  # the number of the resources in the zip 
+        ## turns the list of iteems and their metadata
         if len(items) > 50000: ## 
             raise ValueError("zip contains too many files") ## ive read that this is the appropriate ammount for rejecteing 
         ## the files can be so tiny , and casue a lot of effort to extract them
@@ -44,7 +45,7 @@ def extract_zip_safely(zip_path, extract_dir): ## zip path in my computer , extr
                 raise ValueError("suspicious zip compression ratio")
             
             if item.flag_bits & 0x1: # Bitwise AND, asks if the first bit is up(1) , if so , its encrypted
-                raise ValueError("encrypted ZIP files are not supported")
+                raise ValueError("encrypted zip files are not supported")
             ## 0001 - encrypted , the rightest byte is 1 , 000010 - not 
             output_path = (extract_dir / item.filename).resolve() # C:\scanner\temp\extracted / models/building.glb , not division but connecting the paths C:\scanner\temp\extracted\models\building.glb
 
@@ -95,7 +96,7 @@ def sanitize_package(tileset_path, extract_dir):
 
         is_glb = is_glb_by_magic(item["path"])
 
-        # 1. not a 3D Tiles file at all (html, exe...)
+        # not a 3D Tiles file at all (html, exe...)
         if item["file_type"] == "OTHER":
             raise HTTPException(status_code=400,
                 detail=f"invalid file in 3D Tiles package: {item['uri']}")
