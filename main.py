@@ -51,7 +51,7 @@ def extract_zip_safely(zip_path, extract_dir): ## zip path in my computer , extr
             if "\\" in item.filename or not output_path.is_relative_to(extract_root):  ## the final path is within the extract root?
                 raise ValueError("unsafe path found inside the zip")
 
-        zip_file.extractall(extract_dir)   ## 
+        zip_file.extractall(extract_dir)   ## extract all is a python function that does the extract
 
 
 # find the one tileset.json inside the folder
