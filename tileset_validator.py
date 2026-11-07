@@ -116,11 +116,10 @@ def collect_tileset_uris(tileset_json):
         if not isinstance(tile, dict): ## has to be dict 
             return
 
-        content = tile.get("content")  ## "content": {"uri": "city.glb"}, we are getting the dict in the content
-
+        content = tile.get("content")  ## "content": {"uri": "city.glb"}, (and the rest) we are getting the dict in the content
         if isinstance(content, dict):  # is this really dict
             uri = content.get("uri") or content.get("url")  # city.glb string
-
+            ## if there are 2 of them , it will return the first one he found - bug
             if isinstance(uri, str): # just checking
                 uris.append({   ## add to the uris list the uri and its location in the json 
                     "uri": uri, ## city.glb
@@ -129,10 +128,10 @@ def collect_tileset_uris(tileset_json):
 
         children = tile.get("children", [])  ## if it doesnt have a children , it goes back to the  father 
 
-        if isinstance(children, list):
+        if isinstance(children, list): ## empty list ? not running
             for index, child in enumerate(children):  ## taking the value and the index so ill know what to delete
                 child_location = f"{location}.children[{index}]"
-                scan_tile(child, child_location)
+                scan_tile(child, child_location) ## root.children[0]
 
     scan_tile(tileset_json.get("root"), "root") ## when doesnt have chikdren , python lets you go back to the next child if there is under the root 
     ## python has a stack of memory or smt
