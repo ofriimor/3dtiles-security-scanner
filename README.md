@@ -6,7 +6,7 @@
 
 # 3D Tiles Security Scanner
 
-A proof of concept API that validates, sanitizes and re-verifies 3D Tiles packages before they reach a viewer.
+A proof of concept that validates, sanitizes and re-verifies 3D Tiles packages before they reach a viewer.
 
 ## The goal
 

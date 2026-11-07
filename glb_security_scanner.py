@@ -13,7 +13,7 @@ def scan_for_xss(glb_json):
         ## + : at least one time , again the tab can be zero times or more, and find the sign "="
         ## like onclick()= onload()= that runs js code
         "JAVASCRIPT_URI": r"javascript\s*:" ## trying to find uris that use javascript funcs 
-        # <a href="javascript:alert('xss things')">click</a>
+        # <a href="javascript:alert('xss things')">click</a> ## has to contain :
     }
 
     findings = []  ## empty list 
