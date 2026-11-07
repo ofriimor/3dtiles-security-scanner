@@ -46,10 +46,10 @@ def inspect_tileset(file_path): ## path to tileset
     asset = tileset_json.get("asset")
 
     if not isinstance(asset, dict):
-        findings.append("Field 'asset' must be an object")  ## append adds object to the end of the list
+        findings.append("field 'asset' must be an object")  ## append adds object to the end of the list
 
     elif not isinstance(asset.get("version"), str):
-        findings.append("Field 'asset.version' must be a string")
+        findings.append("field 'asset.version' must be a string")
 
     # Check geometricError
     geometric_error = tileset_json.get("geometricError")
@@ -71,10 +71,10 @@ def inspect_tileset(file_path): ## path to tileset
     else:
 
         if "boundingVolume" not in root:   
-            findings.append("Missing required field: root.boundingVolume")
+            findings.append("missing required field: root.boundingVolume")
 
         if "geometricError" not in root:
-            findings.append("Missing required field: root.geometricError")
+            findings.append("missing required field: root.geometricError")
         ## both have to be under root field 
         elif (
             not isinstance(root["geometricError"], (int, float))
@@ -195,7 +195,7 @@ def resolve_tileset_uris(uris, tileset_path, extract_dir):
                 "location": item["location"],
                 "file_type": file_type,
                 "status": "ALERT",
-                "message": "External URI is not allowed"
+                "message": "external uri is not allowed"
             })
             continue
 
@@ -206,7 +206,7 @@ def resolve_tileset_uris(uris, tileset_path, extract_dir):
                 "location": item["location"],
                 "file_type": file_type,
                 "status": "ALERT",
-                "message": "Backslashes in URI are not allowed"
+                "message": "backslashes in uri are not allowed"
             })
             continue
 
@@ -218,7 +218,7 @@ def resolve_tileset_uris(uris, tileset_path, extract_dir):
                 "location": item["location"],
                 "file_type": file_type,
                 "status": "ALERT",
-                "message": "Empty or absolute URI path"
+                "message": "empty or absolute uri path"
             })
             continue
 
@@ -238,7 +238,7 @@ def resolve_tileset_uris(uris, tileset_path, extract_dir):
                 "location": item["location"],
                 "file_type": file_type,
                 "status": "ALERT",
-                "message": "URI points outside the ZIP directory"
+                "message": "uri points outside the zip"
             })
             continue
 
@@ -250,7 +250,7 @@ def resolve_tileset_uris(uris, tileset_path, extract_dir):
                 "location": item["location"],
                 "file_type": file_type,
                 "status": "ALERT",
-                "message": "Referenced file does not exist inside the ZIP"
+                "message": "the file does not exist inside the zip"
             })
             continue
 
