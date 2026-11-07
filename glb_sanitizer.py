@@ -60,7 +60,9 @@ def rebuild_glb(original_path, new_json, output_path):
     with open(original_path, "rb") as file: #3 open the original path of the glb and read it as binary
         data = file.read() ## and now in data reads it and put it in a bytes object
 
-    magic, version, old_length = struct.unpack_from("<4sII", data, 0) ## start reading from zero
+    magic, version, old_length = struct.unpack_from("<4sII", data, 0) 
+    # <4sII : is format language , of the struct moudule in python called format string , I is int
+    ## start reading from zero
     #(i added old length cause tuple needs 3 values and i needed to add 3 parametrs)
     # it returns a tuple 
     # takes the bytes and turns them into python values by some patttern

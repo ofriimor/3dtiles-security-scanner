@@ -91,21 +91,31 @@ def sanitize_package(tileset_path, extract_dir):
     }
 
     # clean every glb
-    for item in tileset_result["files"]:  ## every items in the tileset result dict
+    for item in tileset_result["files"]:
 
         is_glb = is_glb_by_magic(item["path"])
 
-        if item["file_type"] != "GLB" and not is_glb:  ## there is no chance its glb at all
-            ## ill handle those in the future, like b3dm or others
+        # 1. not a 3D Tiles file at all (html, exe...)
+        if item["file_type"] == "OTHER":
+            raise HTTPException(status_code=400,
+                detail=f"invalid file in 3D Tiles package: {item['uri']}")
+
+        #  .glb extension but not glb magic
+        if item["file_type"] == "GLB" and not is_glb:
+            raise HTTPException(status_code=400,
+                detail=f"invalid glb magic bytes: {item['uri']}")
+
+        # other extension but glb magic (a GLB file hiding as .b3dm) - idk why , but not approved
+        if item["file_type"] != "GLB" and is_glb:
+            raise HTTPException(status_code=400,
+                detail=f"glb magic bytes with wrong extension: {item['uri']}")
+
+        # a known 3D Tiles type we can't scan yet
+        if item["file_type"] != "GLB":
             report["not_scanned"].append(item["uri"])
             continue
 
-        if not is_glb: ## meaning its .glb but! the magic bytes are not it , i wiill not scan it 
-            raise HTTPException(
-                status_code=400,
-                detail=f"invalid GLB magic bytes: {item['uri']}"
-            )
-
+        # what's left is a real GLB: scan it
         glb_result = sanitize_glb(item["path"], item["path"])     # (where we have the item we want to scan , overriding it with the sanatized file)
 
         if glb_result["status"] == "REJECT":  ## coudtnt sanatize it . or the structure incorrect
