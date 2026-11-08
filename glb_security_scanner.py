@@ -2,7 +2,7 @@ import re   ## working with regex to search the patterns
 from glb_validator import inspect_glb ## making sure its validated
 
 
-# Scan the GLB JSON for suspicious XSS patterns
+# scan the glb json for suspicious xss patterns
 def scan_for_xss(glb_json):
 
     suspicious_patterns = {

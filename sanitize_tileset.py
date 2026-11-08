@@ -22,7 +22,8 @@ def location_to_steps(location):
 def rebuild_tileset(tileset_json, output_path):
 
     with open(output_path, "w", encoding="utf-8") as file:
-        json.dump(tileset_json, file, indent=2)
+        json.dump(tileset_json, file, indent=2) # takes the stanazied tileset to write and overrides the tileset
+        ## indent is 2 hazahot, if not indent then the whole json would be in one row 
 
 
 # remove bad uris and save a new tileset.json, the tiles themselves stay
