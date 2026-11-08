@@ -20,27 +20,18 @@ def scan_for_xss(glb_json):
 
     # check every value inside the json
     def check_value(value, location):  
-
         if isinstance(value, dict): 
-
             for key, nested_value in value.items(): 
-
                 new_location = f"{location}.{key}"
 
                 check_value(nested_value, new_location)
-
         elif isinstance(value, list):
 
             for index, nested_value in enumerate(value):
-
                 new_location = f"{location}[{index}]"
-
                 check_value(nested_value, new_location)
-
         elif isinstance(value, str):
-
             for rule, pattern in suspicious_patterns.items():
-
                 if re.search(pattern, value, re.IGNORECASE):
 
                     findings.append({
