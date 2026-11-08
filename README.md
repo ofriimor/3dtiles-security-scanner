@@ -242,22 +242,6 @@ docker run --rm -p 8000:8000 tiles-scanner
 
 The image is `python:3.12-slim`, copies only `requirements.txt` and `*.py`, and runs `uvicorn main:app --host 0.0.0.0 --port 8000`.
 
-### Locally
-
-Python 3.9 or newer (`Path.is_relative_to`).
-
-```bash
-pip install -r requirements.txt      # fastapi, uvicorn, python-multipart
-uvicorn main:app --port 8000
-```
-
-### Try it
-
-```bash
-curl -F "file=@sanitized/13_xss_script_in_generator.zip" \
-     -o result.zip http://localhost:8000/tileset-scanner/
-```
-
 ## Test packages
 
 80 hand-built packages, each with its expected verdict and what it tests in `expected.json`. All 80 currently produce the expected result.
